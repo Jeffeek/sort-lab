@@ -1,0 +1,15 @@
+{
+  "name": "sort-visualizer",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Sorting algorithm visualizer with a pluggable, generator-based architecture.",
+  "scripts": {
+    "start": "npx --yes http-server . -c-1 -p 8080 -o",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "vitest": "^2.0.0"
+  }
+}

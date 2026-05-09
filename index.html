@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorting Visualizer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="controls">
+        <label>Algorithm     <select id="algorithm"></select></label>
+        <label>Distribution  <select id="distribution"></select></label>
+        <label>Renderer      <select id="renderer"></select></label>
+        <label>Size          <input type="number" id="arraySize"   value="120" min="4" max="4000"></label>
+        <label>Ops/frame     <input type="number" id="opsPerFrame" value="1"   min="1" max="5000"></label>
+        <label>Seed          <input type="text"   id="seed"        placeholder="auto"></label>
+        <label class="audio-toggle"><input type="checkbox" id="audio"> Audio</label>
+        <span class="spacer"></span>
+        <button id="btnStart">Start</button>
+        <button id="btnPause" class="secondary" disabled>Pause</button>
+        <button id="btnStep"  class="secondary" disabled>Step</button>
+    </div>
+
+    <div id="stage">
+        <div id="container"></div>
+    </div>
+
+    <aside id="sidebar">
+        <div class="section">
+            <h3>Stats</h3>
+            <div class="stats-grid">
+                <div class="k">Compares</div><div class="v" id="statCompares">0</div>
+                <div class="k">Swaps</div>   <div class="v" id="statSwaps">0</div>
+                <div class="k">Reads</div>   <div class="v" id="statReads">0</div>
+                <div class="k">Writes</div>  <div class="v" id="statWrites">0</div>
+                <div class="k">Elapsed</div> <div class="v" id="statElapsed">0.00s</div>
+            </div>
+        </div>
+        <div class="section">
+            <h3>Complexity</h3>
+            <div id="complexity"></div>
+        </div>
+        <div class="section">
+            <h3>Pseudocode</h3>
+            <div id="pseudocode"></div>
+        </div>
+        <div class="section">
+            <h3>Shortcuts</h3>
+            <div id="advanced_controls">
+                Space — pause/resume<br>
+                R — restart<br>
+                → — step (while paused)<br>
+                M — toggle audio
+            </div>
+        </div>
+    </aside>
+
+    <script type="module" src="src/app.js"></script>
+</body>
+</html>
