@@ -73,12 +73,15 @@ export default {
         }
         yield* bitonicSort(0, pow, 1);
 
+        // Sentinel-paired swaps mutate padded silently (no op emitted), so for
+        // non-power-of-two n the Player's value model can diverge from padded.
+        // Settle unconditionally: the previous `if (a[i] !== padded[i])` guard
+        // was unsafe because original[i] occasionally equals sorted[i] by
+        // coincidence and skipped a needed reconciliation write.
         yield op.line(11);
         for (let i = 0; i < n; i++) {
-            if (a[i] !== padded[i]) {
-                a[i] = padded[i];
-                yield op.write(i, padded[i]);
-            }
+            a[i] = padded[i];
+            yield op.write(i, padded[i]);
         }
     },
 };

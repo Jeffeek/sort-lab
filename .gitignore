@@ -146,3 +146,12 @@ vite.config.ts.timestamp-*
 # IDE
 .idea/
 .vs/
+
+# Rendered videos and tmp render artifacts
+videos/
+*.tmp.mp4
+*.tmp.wav
+
+# Local-only content/video pipeline (not part of the public sorting-visualizer repo)
+tools/
+AGENTS.md

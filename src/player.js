@@ -30,6 +30,12 @@ export class Player {
         this._startTime = 0;
         this._stepOnce = false;
         this._onDone = null;
+        // scheduled-mode state (option B: pre-collected ops paced to a duration)
+        this._mode = 'budget'; // 'budget' | 'scheduled'
+        this._schedOps = null;
+        this._schedIdx = 0;
+        this._schedDuration = 0;
+        this._schedPausedAt = 0;
     }
 
     get state() { return this._state; }
@@ -38,6 +44,8 @@ export class Player {
         if (this._raf) cancelAnimationFrame(this._raf);
         this._raf = null;
         this._iter = null;
+        this._schedOps = null;
+        this._mode = 'budget';
         this._setState('cancelled');
     }
 
@@ -45,26 +53,60 @@ export class Player {
         if (this._state !== 'running') return;
         if (this._raf) cancelAnimationFrame(this._raf);
         this._raf = null;
+        if (this._mode === 'scheduled') this._schedPausedAt = performance.now();
         this._setState('paused');
     }
 
     resume() {
         if (this._state !== 'paused') return;
+        if (this._mode === 'scheduled' && this._schedPausedAt) {
+            this._startTime += performance.now() - this._schedPausedAt;
+            this._schedPausedAt = 0;
+        }
         this._setState('running');
         this._scheduleTick();
     }
 
     step() {
         if (this._state !== 'paused') return;
+        if (this._mode === 'scheduled') {
+            if (this._schedOps && this._schedIdx < this._schedOps.length) {
+                this._apply(this._schedOps[this._schedIdx++]);
+                this.stats?.flush();
+            }
+            return;
+        }
         this._stepOnce = true;
         this._tick();
     }
 
     start(values, generator, { opsPerFrame = 1, onDone } = {}) {
         this.cancel();
+        this._mode = 'budget';
         this.values = values.slice();
         this._iter = generator;
         this.opsPerFrame = Math.max(1, opsPerFrame | 0);
+        this._startTime = performance.now();
+        this._onDone = onDone;
+        this.stats?.reset();
+        this.renderer.mount(this.values);
+        this._setState('running');
+        this._scheduleTick();
+    }
+
+    /**
+     * Scheduled playback: drain a pre-collected ops array linearly over
+     * `durationMs`. Used for Compare-mode synchronized races so all panes
+     * finish at the same wall-clock time, regardless of total op count.
+     */
+    startScheduled(values, ops, durationMs, { onDone } = {}) {
+        this.cancel();
+        this._mode = 'scheduled';
+        this.values = values.slice();
+        this._schedOps = ops;
+        this._schedIdx = 0;
+        this._schedDuration = Math.max(1, durationMs);
+        this._schedPausedAt = 0;
         this._startTime = performance.now();
         this._onDone = onDone;
         this.stats?.reset();
@@ -82,9 +124,22 @@ export class Player {
     }
 
     _tick() {
-        if (!this._iter) return;
         if (this._state !== 'running' && !this._stepOnce) return;
 
+        if (this._mode === 'scheduled') {
+            if (!this._schedOps) return;
+            const elapsed = performance.now() - this._startTime;
+            const total   = this._schedOps.length;
+            const target  = Math.min(total, Math.floor(elapsed / this._schedDuration * total));
+            while (this._schedIdx < target) this._apply(this._schedOps[this._schedIdx++]);
+            this.stats?.tickTime(elapsed);
+            this.stats?.flush();
+            if (this._schedIdx >= total) { this._finish(); return; }
+            if (this._state === 'running') this._scheduleTick();
+            return;
+        }
+
+        if (!this._iter) return;
         const budget = this._stepOnce ? 1 : this.opsPerFrame;
         for (let n = 0; n < budget; n++) {
             const { value: operation, done } = this._iter.next();
@@ -135,6 +190,7 @@ export class Player {
     async _finish() {
         this._raf = null;
         this._iter = null;
+        this._schedOps = null;
         this.stats?.tickTime(performance.now() - this._startTime);
         this.stats?.flush();
         await this.renderer.finale();

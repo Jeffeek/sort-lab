@@ -8,21 +8,32 @@
 </head>
 <body>
     <div id="controls">
-        <label>Algorithm     <select id="algorithm"></select></label>
+        <label>Mode          <select id="mode">
+            <option value="single">Single</option>
+            <option value="compare">Compare</option>
+        </select></label>
+        <label class="single-only">Algorithm     <select id="algorithm"></select></label>
         <label>Distribution  <select id="distribution"></select></label>
-        <label>Renderer      <select id="renderer"></select></label>
+        <label class="single-only">Renderer      <select id="renderer"></select></label>
         <label>Size          <input type="number" id="arraySize"   value="120" min="4" max="4000"></label>
         <label>Ops/frame     <input type="number" id="opsPerFrame" value="1"   min="1" max="5000"></label>
+        <label class="compare-only">Pacing  <select id="pacing">
+            <option value="budget">Ops/frame</option>
+            <option value="scheduled">Synchronized</option>
+        </select></label>
+        <label class="compare-only">Race (s)  <input type="number" id="raceDuration" value="15" min="1" max="600"></label>
         <label>Seed          <input type="text"   id="seed"        placeholder="auto"></label>
         <label class="audio-toggle"><input type="checkbox" id="audio"> Audio</label>
         <span class="spacer"></span>
         <button id="btnStart">Start</button>
         <button id="btnPause" class="secondary" disabled>Pause</button>
         <button id="btnStep"  class="secondary" disabled>Step</button>
+        <button id="btnAddPane" class="secondary compare-only" type="button">+ Pane</button>
     </div>
 
     <div id="stage">
         <div id="container"></div>
+        <div id="panes"></div>
     </div>
 
     <aside id="sidebar">
