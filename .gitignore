@@ -155,3 +155,4 @@ videos/
 # Local-only content/video pipeline (not part of the public sorting-visualizer repo)
 tools/
 AGENTS.md
+test-results/
