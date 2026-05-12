@@ -1,16 +1,8 @@
 import { Algorithms } from './registry.js';
-import { BarRenderer } from './renderer/bar.js';
-import { CircularRenderer } from './renderer/circular.js';
-import { DotRenderer } from './renderer/dot.js';
 import { Player } from './player.js';
 import { Stats } from './stats.js';
 import { Sonifier } from './audio.js';
-
-const RENDERERS = {
-    bar:      { label: 'Bars',     ctor: BarRenderer      },
-    circular: { label: 'Circular', ctor: CircularRenderer },
-    dot:      { label: 'Dots',     ctor: DotRenderer      },
-};
+import { RENDERERS, DEFAULT_RENDERER } from './renderer/index.js';
 
 /**
  * Self-contained comparison pane: one algorithm, one renderer, one player,
@@ -125,7 +117,7 @@ export class Pane {
     _setRenderer(id) {
         if (this._currentRendererId === id && this.renderer) return;
         this.renderer?.destroy?.();
-        const ctor = RENDERERS[id]?.ctor || BarRenderer;
+        const ctor = RENDERERS[id]?.ctor || RENDERERS[DEFAULT_RENDERER].ctor;
         this.renderer = new ctor(this.body);
         this.player.renderer = this.renderer;
         this._currentRendererId = id;

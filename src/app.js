@@ -6,20 +6,12 @@
 import './algorithms/index.js';
 import { Algorithms } from './registry.js';
 import { generateArray, DISTRIBUTIONS, DISTRIBUTION_LABELS } from './data.js';
-import { BarRenderer } from './renderer/bar.js';
-import { CircularRenderer } from './renderer/circular.js';
-import { DotRenderer } from './renderer/dot.js';
 import { Player } from './player.js';
 import { Stats } from './stats.js';
 import { Sonifier } from './audio.js';
 import { Settings } from './settings.js';
 import { Pane } from './pane.js';
-
-const RENDERERS = {
-    bar:      { label: 'Bars',     ctor: BarRenderer      },
-    circular: { label: 'Circular', ctor: CircularRenderer },
-    dot:      { label: 'Dots',     ctor: DotRenderer      },
-};
+import { RENDERERS, DEFAULT_RENDERER } from './renderer/index.js';
 
 class CompareManager {
     constructor({ container, onStateChange }) {
@@ -345,7 +337,7 @@ class App {
     _setRenderer(id, remountOnly = false) {
         if (this._currentRendererId === id && this.renderer) return;
         if (this.renderer?.destroy) this.renderer.destroy();
-        const ctor = RENDERERS[id]?.ctor || BarRenderer;
+        const ctor = RENDERERS[id]?.ctor || RENDERERS[DEFAULT_RENDERER].ctor;
         this.renderer = new ctor(this.dom.container);
         this.player.renderer = this.renderer;
         this._currentRendererId = id;
